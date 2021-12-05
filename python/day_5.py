@@ -37,6 +37,9 @@ def is_winning(board):
         if row_all_trues:
             return True
 
+def sum_pairs(pair_1, pair_2):
+    return pair_1[0] + pair_2[0], pair_1[1] + pair_2[1]
+
 
 if __name__ == '__main__':
     first = True
@@ -67,7 +70,7 @@ if __name__ == '__main__':
                     if y not in field[x1]:
                         field[x1][y] = 0
                     field[x1][y] += 1
-            if y1 == y2:
+            elif y1 == y2:
                 # Vertical
                 # Swap just in case so x2 is always bigger
                 if x2 < x1:
@@ -78,6 +81,30 @@ if __name__ == '__main__':
                     if y1 not in field[x]:
                         field[x][y1] = 0
                     field[x][y1] += 1
+            else:
+                # Should be diagonal
+                x_inc = 1
+                y_inc = 1
+                if x2 < x1:
+                    x_inc = -1
+                if y2 < y1:
+                    y_inc = -1
+                increment = (x_inc, y_inc)
+
+                current_point = (x1, y1)
+
+                while True:
+                    x, y = current_point
+                    if x not in field:
+                        field[x] = {}
+                    if y not in field[x]:
+                        field[x][y] = 0
+                    field[x][y] += 1
+
+                    if current_point == (x2, y2):
+                        break
+
+                    current_point = sum_pairs(current_point, increment)
 
 
     overlaps = 0
@@ -89,4 +116,4 @@ if __name__ == '__main__':
     print(overlaps)
 
     # First part answer:  6007
-    # Second part answer: 13158
+    # Second part answer: 19349
