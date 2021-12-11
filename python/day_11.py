@@ -17,11 +17,16 @@ if __name__ == '__main__':
     # Simulate octopuses
 
     flashes = 0
-    for step in range(100):
+    step = 0
+    matrix_size = len(matrix) * len(matrix[0])
+    met_full_flash = False
+    while not met_full_flash:
+        step += 1
 
         new_matrix = {}
         flashed = set()
         to_flash = set()
+        current_flashes = 0
         for i in matrix:
             for j in matrix[i]:
                 matrix[i][j] += 1
@@ -34,6 +39,7 @@ if __name__ == '__main__':
 
             flashed.add(current_octopus)
             flashes += 1
+            current_flashes += 1
 
             i, j = current_octopus
             matrix[i][j] = 0
@@ -54,9 +60,12 @@ if __name__ == '__main__':
                     matrix[neightbor[0]][neightbor[1]] += 1
                     if matrix[neightbor[0]][neightbor[1]] > 9:
                         to_flash.add(neightbor)
+            if current_flashes == matrix_size:
+                met_full_flash = True
+                print(f'Part 2: {step}')
+                break
+        if step == 100:
+            print(f'Part 1: {flashes}')
 
-    print(f'Part 1: {flashes}')
-    print(f'Part 2: {line_scores[0]}')
-
-    # First part answer:  1599
-    # Second part answer: 1870887234
+    # First part answer: 1599
+    # Second part answer: 418
