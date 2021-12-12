@@ -1,7 +1,48 @@
 import os
 
+
+def is_route_good(current_route, neighbor, small_caves, part):
+    if neighbor == 'start' or neighbor == 'end' and neighbor in current_route:
+        return False
+
+    # Don't visit small cave more than once
+    if neighbor in small_caves and neighbor in current_route:
+        if 1 == part:
+            return False
+
+        # Here is part 2
+        # Check whether current_route has small dups already
+        counter = {}
+        for v in current_route:
+            if v not in small_caves:
+                continue
+            if v in counter:
+                return False
+            counter[v] = 1
+    return True
+
+
+def solve(vertexes, small_caves, part):
+    stack = [['start']]
+    number = 0
+    while stack:
+        current_route = stack.pop()
+        current = current_route[-1]
+        if current == 'end':
+            # We're done for this path
+            number += 1
+            continue
+        for neighbor in vertexes[current]:
+            # Replace number for corresponding part
+            if not is_route_good(current_route, neighbor, small_caves, part):
+                continue
+            stack.append(current_route + [neighbor])
+    return number
+
+
 if __name__ == '__main__':
     vertexes = {}
+    small_caves = set()
     with open(os.path.join('..', 'day_12_input.txt'), 'r') as f:
         for line in f:
             line = line.strip()
@@ -12,45 +53,13 @@ if __name__ == '__main__':
                 vertexes[end] = []
             vertexes[start].append(end)
             vertexes[end].append(start)
+            if start.islower():
+                small_caves.add(start)
+            if end.islower():
+                small_caves.add(end)
 
-    stack = [['start']]
-    number = 0
-    while stack:
-        current_route = stack.pop()
-        current = current_route[-1]
-        if current == 'end':
-            # We're done for this path
-            number += 1
-            continue
-        for neightbor in vertexes[current]:
-            suggested_route = current_route + [neightbor]
-            # Check we won't visit small caves twice
-            counter = {}
-            bad_route = False
-            for v in suggested_route:
-                if not v.islower():
-                    continue
-                if v not in counter:
-                    counter[v] = 0
-
-                if counter[v] > 0 and v in ['start', 'end']:
-                    # Don't visit start/end again
-                    bad_route = True
-                    break
-                elif counter[v] > 1:
-                    # Don't visit anything more than trice
-                    bad_route = True
-                    break
-                counter[v] += 1
-            how_many_gonna_go_twice = len([n for n in counter.values() if n > 1])
-            solving_part_1 = how_many_gonna_go_twice > 0
-            solving_part_2 = how_many_gonna_go_twice > 1
-            # Replace condition for corresponding part
-            if bad_route or solving_part_2:
-                continue
-            stack.append(suggested_route)
-
-    print(f'Result: {number}')
+    print(f'Part 1: {solve(vertexes, small_caves, 1)}')
+    print(f'Part 2: {solve(vertexes, small_caves, 2)}')
 
     # First part answer: 3000
     # Second part answer: 74222
