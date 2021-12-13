@@ -1,7 +1,9 @@
 import os
 
 
-def print_matrix(matrix, n_rows, n_columns):
+def print_matrix(matrix):
+    n_columns = max([max(matrix[row].keys()) for row in matrix])
+    n_rows = max(matrix.keys())
     for i in range(0, n_rows+1):
         row_str = ''
         for j in range(0, n_columns+1):
@@ -36,24 +38,26 @@ if __name__ == '__main__':
                 line = line[11:]
                 folds.append(line.split('='))
             elif line:
-                y, x = line.split(',')
+                x, y = line.split(',')
                 x, y = int(x), int(y)
-                if x not in matrix:
-                    matrix[x] = {}
-                if x > n_rows:
-                    n_rows = x
-                if y > n_columns:
-                    n_columns = y
-                matrix[x][y] = 1
-
-    new_matrix = {}
+                if y not in matrix:
+                    matrix[y] = {}
+                if x > n_columns:
+                    n_columns = x
+                if y > n_rows:
+                    n_rows = y
+                matrix[y][x] = 1
 
     part_1 = 0
     for fold in folds:
         # print('='*40)
-        # print_matrix(matrix, n_rows, n_columns)
+        # print_matrix(matrix)
         # print('='*40)
         coord = int(fold[1])
+        new_matrix = {}
+
+        n_columns = max([max(matrix[row].keys()) for row in matrix])
+        n_rows = max(matrix.keys())
         if fold[0] == 'y':
             for x in range(0, n_rows + 1):
                 for y in range(0, n_columns + 1):
@@ -69,7 +73,6 @@ if __name__ == '__main__':
                         if x not in new_matrix:
                             new_matrix[x] = {}
                         new_matrix[x][y] = 1
-            n_rows = int((n_rows) / 2)
         if fold[0] == 'x':
             for x in range(0, n_rows + 1):
                 for y in range(0, n_columns + 1):
@@ -86,7 +89,6 @@ if __name__ == '__main__':
                             new_matrix[x] = {}
                         new_matrix[x][y] = 1
 
-            n_columns = int((n_columns) / 2)
         matrix = new_matrix
         # Only first one
         if 0 == part_1:
@@ -95,9 +97,9 @@ if __name__ == '__main__':
 
     print(f'Part 1: {part_1}')
 
-    print_matrix(matrix, n_rows, n_columns)
+    print_matrix(matrix)
     print('=' * 40)
-    print_matrix_transposed(matrix, n_rows, n_columns)
+    #print_matrix_transposed(matrix, n_rows, n_columns)
 
     # First part answer:  751
-    # Second part answer: 1558722
+    # Second part answer: PGHRKLKL
