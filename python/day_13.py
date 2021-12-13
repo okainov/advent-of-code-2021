@@ -10,7 +10,7 @@ def print_matrix(matrix):
             if i in matrix and j in matrix[i]:
                 row_str += '#'  # str(matrix[i][j])
             else:
-                row_str += '.'
+                row_str += ' '
         print(row_str)
 
 
@@ -64,7 +64,8 @@ if __name__ == '__main__':
                     if x not in matrix or y not in matrix[x]:
                         continue
                     if x > coord:
-                        x_new = n_rows - x
+                        # For some reason 2*coord != n_rows always, so use symmetry instead
+                        x_new = coord - abs(x - coord)
                         y_new = y
                         if x_new not in new_matrix:
                             new_matrix[x_new] = {}
@@ -80,7 +81,8 @@ if __name__ == '__main__':
                         continue
                     if y > coord:
                         x_new = x
-                        y_new = n_columns - y
+                        # For some reason 2*coord != n_columns always, so use symmetry instead
+                        y_new = coord - abs(y - coord)
                         if x_new not in new_matrix:
                             new_matrix[x_new] = {}
                         new_matrix[x_new][y_new] = 2
