@@ -1,19 +1,5 @@
 import os
 
-
-def print_matrix(matrix):
-    n_columns = max([max(matrix[row].keys()) for row in matrix])
-    n_rows = max(matrix.keys())
-    for x in range(0, n_rows + 1):
-        row_str = ''
-        for y in range(0, n_columns + 1):
-            if x in matrix and y in matrix[x]:
-                row_str += '█'
-            else:
-                row_str += ' '
-        print(row_str)
-
-
 if __name__ == '__main__':
     polymer = ''
     transforms = {}
@@ -27,27 +13,52 @@ if __name__ == '__main__':
                 if line:
                     polymer = line.strip()
 
-    iterations = 10
+    polymer_pairs = {}
+    for i, c in enumerate(polymer):
+        pair = polymer[i:i + 2]
+        if len(pair) != 2:
+            continue
+        if pair not in polymer_pairs:
+            polymer_pairs[pair] = 0
+        polymer_pairs[pair] += 1
+
+    # Add special begin/end pairs
+    polymer_pairs[polymer[0] + '$'] = 1
+    polymer_pairs['$' + polymer[-1]] = 1
+
+    iterations = 40
 
     for iteration in range(iterations):
-        new_poly = ''
-        for i in range(len(polymer)):
-            current_c = polymer[i]
-            sliding_window = polymer[i:i + 2]
-            new_poly += current_c
-            if sliding_window in transforms:
-                new_poly += transforms[sliding_window]
-        polymer = new_poly
+        new_pairs = {}
 
-    counter = {}
-    for c in polymer:
-        if c not in counter:
-            counter[c] = 0
-        counter[c] += 1
+        for pair in polymer_pairs:
+            if pair in transforms:
+                new_one = pair[0] + transforms[pair]
+                new_two = transforms[pair] + pair[1]
+                if new_one not in new_pairs:
+                    new_pairs[new_one] = 0
+                if new_two not in new_pairs:
+                    new_pairs[new_two] = 0
+                new_pairs[new_one] += polymer_pairs[pair]
+                new_pairs[new_two] += polymer_pairs[pair]
+            else:
+                # Special begin/end pairs which never change
+                new_pairs[pair] = polymer_pairs[pair]
+        polymer_pairs = new_pairs
 
-    numbers = list(counter.values())
+        if iteration in [10 - 1, 40 - 1]:
+            counter_letters = {}
+            for pair in polymer_pairs:
+                for c in pair:
+                    if c not in counter_letters:
+                        counter_letters[c] = 0
+                    counter_letters[c] += polymer_pairs[pair]
 
-    print(f'Part 1: {max(numbers) - min(numbers)}')
+            for c in counter_letters:
+                # Each letter is counted twice (as first in pair and second in pair)
+                counter_letters[c] = int(counter_letters[c] / 2)
+            del counter_letters['$']
+            print(f'Iteration ({iteration + 1}): {max(counter_letters.values()) - min(counter_letters.values())}')
 
-    # First part answer:  2851
-    # Second part answer: PGHRKLKL
+# First part answer:  2851
+# Second part answer: 10002813279337
