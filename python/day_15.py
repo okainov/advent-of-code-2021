@@ -1,6 +1,7 @@
+import heapq
 import os
 
-from python.utils import sum_pairs
+from utils import sum_pairs
 
 if __name__ == '__main__':
     matrix = {}
@@ -16,32 +17,37 @@ if __name__ == '__main__':
                 matrix[row][i] = int(c)
             row += 1
 
-    queue = {(0, 0): 0}
+    real_size = size_cave * 5
+
+    queue = []  # {(0, 0): 0}
+    heapq.heappush(queue, (0, (0, 0)))
     costs = {(0, 0): 0}
     visited = set()
     number = 0
     while queue:
-        current_position = [x for x in queue if queue[x] == min(queue.values())][0]
-        current_length = queue[current_position]
-        del queue[current_position]
+        _, current_position = heapq.heappop(queue)
+        if current_position in visited:
+            continue
         visited.add(current_position)
-        if current_position == (size_cave - 1, size_cave - 1):
+        current_length = costs[current_position]
+        if current_position == (real_size - 1, real_size - 1):
             break
 
         for neightbor in (sum_pairs(current_position, (1, 0)),
-                          sum_pairs(current_position, (0, 1)),
-                # sum_pairs(current_position, (0, -1)),
-                # sum_pairs(current_position, (-1, 0)),
+                          sum_pairs(current_position, (0, 1))
                           ):
-            if neightbor[0] < 0 or neightbor[0] >= len(matrix) or neightbor[1] < 0 or neightbor[1] >= len(
-                    matrix[0]) or neightbor in visited:
+            if neightbor[0] >= real_size or neightbor[1] >= real_size or neightbor in visited:
                 continue
-            neightbor_val = matrix[neightbor[0]][neightbor[1]]
+            adds = neightbor[0] // size_cave
+            real_x = neightbor[0] % size_cave
+            adds += neightbor[1] // size_cave
+            real_y = neightbor[1] % size_cave
+            neightbor_val = (matrix[real_x][real_y] + adds - 1) % 9 + 1
             costs[neightbor] = min(current_length + neightbor_val, costs.get(neightbor, 99999999999999))
-            if neightbor not in visited:
-                queue[neightbor] = costs[neightbor]
+            heapq.heappush(queue, (costs[neightbor], neightbor))
 
     print(costs[size_cave - 1, size_cave - 1])
+    print(costs[real_size - 1, real_size - 1])
 
 # First part answer:  824
-# Second part answer: 10002813279337
+# Second part answer: 3063
