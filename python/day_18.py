@@ -1,5 +1,6 @@
 import json
 import os
+from copy import deepcopy
 
 
 class Node:
@@ -87,13 +88,13 @@ def find_right_number(node):
     return current
 
 
-def traverse_tree(node):
+def traverse_tree_for_explode(node):
     if not node:
         return
     if node.get_level() == 4 and node.left and isinstance(node.left.value, int) and node.right and isinstance(
             node.right.value, int):
         # Explode
-        print(f'Exploding {node}')
+        # print(f'Exploding {node}')
         left_to_explode = find_left_number(node)
         if left_to_explode:
             if left_to_explode and left_to_explode.value is not None:
@@ -116,9 +117,9 @@ def traverse_tree(node):
     #     print(node.value)
     action_happened = False
     if not action_happened:
-        action_happened = traverse_tree(node.left)
+        action_happened = traverse_tree_for_explode(node.left)
     if not action_happened:
-        action_happened = traverse_tree(node.right)
+        action_happened = traverse_tree_for_explode(node.right)
     return action_happened
 
 
@@ -127,14 +128,12 @@ def traverse_tree_for_split(node):
         return
     if node.value is not None and node.value >= 10:
         # Split
-        print(f'Splitting {node}')
+        # print(f'Splitting {node}')
 
         node.left = Node(parent=node, value=node.value // 2)
         node.right = Node(parent=node, value=node.value // 2 + node.value % 2)
         node.value = None
         return True
-    # if node.value is not None:
-    #     print(node.value)
     action_happened = False
     if not action_happened:
         action_happened = traverse_tree_for_split(node.left)
@@ -147,13 +146,13 @@ def reduce_fish(fish):
     action_happened = True
     while action_happened:
         # print('----Before   ' + str(fish))
-        explode_happened = traverse_tree(fish)
+        explode_happened = traverse_tree_for_explode(fish)
         split_happened = False
         if not explode_happened:
             split_happened = traverse_tree_for_split(fish)
         action_happened = explode_happened or split_happened
         # print('----After   ' + str(fish))
-    print(fish)
+    # print(fish)
 
 
 if __name__ == '__main__':
@@ -163,20 +162,32 @@ if __name__ == '__main__':
             line = line.strip()
             fishes.append(Node.build_node(json.loads(line)))
 
+    max_magnitude = 0
+    for fish_1 in fishes:
+        for fish_2 in fishes:
+            if fish_1 == fish_2:
+                continue
+            # Really need to deepcopy to avoid conflicts/messes
+            new_fish = Node.merge_nodes(deepcopy(fish_1), deepcopy(fish_2))
+            reduce_fish(new_fish)
+            mag = new_fish.get_magnitude()
+            if mag > max_magnitude:
+                max_magnitude = mag
+
     while len(fishes) > 1:
-        print('=' * 40)
-        print('Adding')
-        print(' +' + str(fishes[0]))
-        print(' +' + str(fishes[1]))
+        # print('=' * 40)
+        # print('Adding')
+        # print(' +' + str(fishes[0]))
+        # print(' +' + str(fishes[1]))
         new_fish = Node.merge_nodes(fishes[0], fishes[1])
-        print(' =' + str(new_fish))
-        print('Reducing')
+        # print(' =' + str(new_fish))
+        # print('Reducing')
         reduce_fish(new_fish)
-        print(' =' + str(new_fish))
+        # print(' =' + str(new_fish))
         fishes = [new_fish] + fishes[2:]
 
     print(f'Part 1: {fishes[0].get_magnitude()}')
-    # print(f'Part 2: {good_speeds}')
+    print(f'Part 2: {max_magnitude}')
 
 # First part answer:  4347
-# Second part answer: 1733
+# Second part answer: 4721
