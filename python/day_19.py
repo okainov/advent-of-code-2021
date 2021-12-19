@@ -1,5 +1,4 @@
 import os
-from copy import copy
 
 # http://www.euclideanspace.com/maths/algebra/matrix/transforms/examples/index.htm
 ROTATION_MATRIXES = [
@@ -158,25 +157,18 @@ def minus_pairs(vector1, vector2):
 
 def map_scanner(unknown_scanner, beacons_real_coordinates, scanners, scanner_coords):
     print(f'Trying to map scanner {unknown_scanner}')
-    for point in copy(beacons_real_coordinates):
+    for point in beacons_real_coordinates:
         for point_2 in scanners[unknown_scanner]:
             for rotation_matrix in ROTATION_MATRIXES:
                 # Let's assume that point and point_2 are the same beacon and then test our assumption
                 scanner_2_coord = minus_pairs(point, multiply(rotation_matrix, point_2))
-                matching_points = 0
-                for test_point in scanners[unknown_scanner]:
-                    test_coord_in_s1 = sum_pairs(multiply(rotation_matrix, test_point), scanner_2_coord)
-                    if test_coord_in_s1 in beacons_real_coordinates:
-                        matching_points += 1
-                        if matching_points >= 12:
-                            # That's a good match, let's add all beacons
-                            print(f'Found match for scanner {unknown_scanner}')
-                            for good_point in scanners[unknown_scanner]:
-                                beacons_real_coordinates.add(sum_pairs(multiply(rotation_matrix, good_point),
-                                                                       scanner_2_coord))
-
-                            scanner_coords[unknown_scanner] = scanner_2_coord
-                            return True
+                shifted_points = set(
+                    [sum_pairs(multiply(rotation_matrix, x), scanner_2_coord) for x in scanners[unknown_scanner]])
+                if len(beacons_real_coordinates & shifted_points) >= 12:
+                    print(f'Found match for scanner {unknown_scanner}')
+                    beacons_real_coordinates |= shifted_points
+                    scanner_coords[unknown_scanner] = scanner_2_coord
+                    return True
     return False
 
 
