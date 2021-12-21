@@ -35,6 +35,17 @@ def solve_part_1(p1, p2):
     print(f'Part 1: {p2_score * n_dices}')
 
 
+MULTIPLIERS = {
+    3: 1,
+    4: 3,
+    5: 6,
+    6: 7,
+    7: 6,
+    8: 3,
+    9: 1,
+}
+
+
 def solve_part_2(p1, p2, p1_score, p2_score, memo, turn=1):
     if (p1, p2, p1_score, p2_score, turn) in memo:
         return memo[(p1, p2, p1_score, p2_score, turn)]
@@ -46,19 +57,15 @@ def solve_part_2(p1, p2, p1_score, p2_score, memo, turn=1):
         return memo[(p1, p2, p1_score, p2_score, turn)]
     current_res = (0, 0)
 
-    for roll1 in [1, 2, 3]:
-        for roll2 in [1, 2, 3]:
-            for roll3 in [1, 2, 3]:
-                roll = roll1 + roll2 + roll3
-
-                if turn == 1:
-                    new_p1_pos = (p1 + roll - 1) % 10 + 1
-                    current_res = sum_pairs(current_res,
-                                            solve_part_2(new_p1_pos, p2, p1_score + new_p1_pos, p2_score, memo, 2))
-                else:
-                    new_p2_pos = (p2 + roll - 1) % 10 + 1
-                    current_res = sum_pairs(current_res,
-                                            solve_part_2(p1, new_p2_pos, p1_score, p2_score + new_p2_pos, memo, 1))
+    for roll in [3, 4, 5, 6, 7, 8, 9]:
+        if turn == 1:
+            new_p1_pos = (p1 + roll - 1) % 10 + 1
+            current_game = solve_part_2(new_p1_pos, p2, p1_score + new_p1_pos, p2_score, memo, 2)
+        else:
+            new_p2_pos = (p2 + roll - 1) % 10 + 1
+            current_game = solve_part_2(p1, new_p2_pos, p1_score, p2_score + new_p2_pos, memo, 1)
+        current_res = sum_pairs(current_res,
+                                [x * MULTIPLIERS[roll] for x in current_game])
     memo[(p1, p2, p1_score, p2_score, turn)] = current_res
     return current_res
 
